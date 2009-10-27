@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+MultipleArgs=false
+Terminal=true
+Exec=weechat-curses
+Icon=weechat
+Type=Application
+Categories=Network;IRCClient;
+StartupNotify=false
+Name=Weechat
+GenericName=IRC Client
+
+
+X-SuSE-translate=true
