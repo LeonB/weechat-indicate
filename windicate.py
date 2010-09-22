@@ -1,14 +1,15 @@
 # Author: Leon Bogaert <leon AT tim-online DOT nl>
 # This Plugin Calls the libindicate bindings via python when somebody says your
 # nickname, sends you a query, etc.
-# To make it work, you may need to download: python-indicate
+# To make it work, you may need to download: python-indicate and python-dbus
 # Requires Weechat 0.3.0
 # Released under GNU GPL v2
 #
-# 2009-10-29, Leon <leon@tim-online.nl>:
+# 2010-09-22, Leon <leon@tim-online.nl>:
 #     version 0.0.1 Intial release
 # 
 # @TODO: find out how to jump to buffer/line
+# @TODO: how to communicate the click to weechat
 # @TODO: decide what to do if a user clicks an indicator an then start typing:
 #        * leave indicators alone
 #        * remove indicators in the "neighbourhood"
@@ -18,6 +19,8 @@
 
 import dbus.service
 import inspect
+import os
+import tempfile
 
 class DBUSService(dbus.service.Object):
     def __init__(self, messageMenu):
@@ -35,11 +38,26 @@ class MessageMenu(object):
 
         server = pyindicate.indicate_server_ref_default()
         server.set_type("message.im")
-        #server.set_desktop_file(os.path.join(os.getcwd(), "weechat.desktop"))
-        #server.set_desktop_file("/usr/share/app-install/desktop/gnome-terminal.desktop")
-        server.set_desktop_file("/home/leon/Workspaces/weechat-indicate/weechat.desktop")
+        server.set_desktop_file(self.desktop_file())
         server.connect("server-display", self.server_click)
         server.show()
+
+    def desktop_file(self):
+        file = "/usr/share/applications/weechat.desktop"
+
+        if os.path.isfile(file):
+            return file
+
+        f = tempfile.NamedTemporaryFile(suffix='indicator', delete=False)
+        f.write("[Desktop Entry]\nEncoding=UTF-8\nMultipleArgs=false\nTerminal=true\nExec=weechat-curses\nIcon=weechat\nType=Application\nCategories=Network;IRCClient;\nStartupNotify=false\nName=Weechat\nGenericName=IRC Client")
+        f.close()
+        self.tmp_file = f
+
+        return f.name
+
+    def __del__(self):
+        if self.tmp_file and os.file.exists(self.tmp_file):
+            os.unlink(self.tmp_file)
 
     def server_click(self, server, time):
         print "Server clicked!"
