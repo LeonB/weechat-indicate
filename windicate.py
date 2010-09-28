@@ -61,6 +61,7 @@ class MessageMenu(object):
 
     def server_click(self, server, time):
         #print "Server clicked!" #no print, weechat doesn't like that ;)
+        pass
 
     def add_message(self, channel, sender, body):
         for message in self.messages:
